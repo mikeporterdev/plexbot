@@ -1,7 +1,7 @@
 import client from './discord';
 import { Message } from 'discord.js';
 import { redownloadTV } from './plexbot-actions';
-import SonarrError from './exceptions/SonarrError';
+import PlexbotError from './exceptions/PlexbotError';
 import { RedownloadStatus } from './types/types';
 
 const redownloadCommand = 'plexbot redownload';
@@ -54,7 +54,7 @@ async function redownload(msg: Message, content: string): Promise<void> {
       }
     }
   } catch (e) {
-    if (e instanceof SonarrError) {
+    if (e instanceof PlexbotError) {
       await msg.reply(e.message);
     } else {
       await msg.reply('Something went wrong :(');

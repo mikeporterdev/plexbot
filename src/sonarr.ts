@@ -1,7 +1,7 @@
 import axios from 'axios';
-import SonarrError from './exceptions/SonarrError';
-import FuzzySet = require('fuzzyset.js');
+import PlexbotError from './exceptions/PlexbotError';
 import { Episode, QueueItem, RedownloadStatus, Show } from './types/types';
+import { findMatching } from './get-fuzzy';
 
 const sonarrUrl = process.env.SONARR_URL;
 const sonarrApiKey = process.env.SONARR_API_KEY;
@@ -18,7 +18,7 @@ function buildConnectionStringWithId(command: string, id: number): string {
 
 export async function redownloadShow(showName: string, episodeNumber: string): Promise<RedownloadStatus> {
   if (!episodeNumber.toUpperCase().match(new RegExp('S\\d\\dE\\d\\d'))) {
-    throw new SonarrError('Invalid episode number, should be format S01E01');
+    throw new PlexbotError('Invalid episode number, should be format S01E01');
   }
 
   const season = episodeNumber.substring(1, 3);
@@ -26,10 +26,10 @@ export async function redownloadShow(showName: string, episodeNumber: string): P
 
   const shows = await getShows();
 
-  const matchingShow = await findMatchingShow(shows, showName);
+  const matchingShow = findMatching(shows, i => i.title, showName);
 
   if (!matchingShow) {
-    throw new SonarrError(`Could not find show with name ${showName} ¯\\_(ツ)_/¯`);
+    throw new PlexbotError(`Could not find show with name ${showName} ¯\\_(ツ)_/¯`);
   }
 
   console.log('Getting episode');
@@ -40,7 +40,7 @@ export async function redownloadShow(showName: string, episodeNumber: string): P
   );
 
   if (!matchingEpisode) {
-    throw new SonarrError(`Could not find episode ${episodeNumber} inside ${showName}`);
+    throw new PlexbotError(`Could not find episode ${episodeNumber} inside ${showName}`);
   }
 
   if (matchingEpisode.episodeFileId !== 0) {
@@ -57,22 +57,6 @@ export async function redownloadShow(showName: string, episodeNumber: string): P
   await searchForEpisode(matchingEpisode.id);
 
   return RedownloadStatus.TRIGGERED_DOWNLOAD;
-}
-
-function findMatchingShow(shows: Show[], showName: string): Show | null {
-  const exactMatch = shows.find(i => i.title.toLowerCase() === showName.toLowerCase());
-  if (exactMatch) {
-    return exactMatch;
-  }
-
-  const fuzzySet = FuzzySet(shows.map(i => i.title));
-  const closestMatches = fuzzySet.get(showName);
-
-  if (closestMatches) {
-    throw new SonarrError(`Couldn't find show with name ${showName}, did you mean ${closestMatches[0][1]}?`);
-  }
-
-  return null;
 }
 
 async function getEpisodesForShow(show: Show): Promise<Episode[]> {

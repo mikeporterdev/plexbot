@@ -1,6 +1,6 @@
 # Plexbot
 
-![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/mikeporterdev/plexbot)~~~~
+![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/mikeporterdev/plexbot)
 
 A simple discord bot that will allow users to trigger Sonarr to redownload particular episodes, in case of a bad 
 download.
