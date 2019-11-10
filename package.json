@@ -7,7 +7,8 @@
     "compile": "tsc",
     "compile:watch": "tsc-watch",
     "start": "tsc-watch --onSuccess \"nodemon dist\"",
-    "lint": "eslint src --ext ts"
+    "lint": "eslint src --ext ts",
+    "lint:fix": "eslint src --ext ts --fix"
   },
   "keywords": [],
   "author": "",
@@ -21,7 +22,11 @@
   "devDependencies": {
     "@types/axios": "^0.14.0",
     "@types/fuzzyset.js": "0.0.2",
+    "@typescript-eslint/eslint-plugin": "^2.6.1",
+    "@typescript-eslint/parser": "^2.6.1",
     "eslint": "^6.6.0",
+    "eslint-config-prettier": "^6.5.0",
+    "eslint-plugin-prettier": "^3.1.1",
     "nodemon": "^1.19.4",
     "prettier": "^1.19.1",
     "tsc-watch": "^4.0.0",

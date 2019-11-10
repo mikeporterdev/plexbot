@@ -1,9 +1,11 @@
 import axios from 'axios';
 import SonarrError from './exceptions/SonarrError';
 import FuzzySet = require('fuzzyset.js');
+import { Episode, QueueItem, RedownloadStatus, Show } from './types/types';
 
 const sonarrUrl = process.env.SONARR_URL;
 const sonarrApiKey = process.env.SONARR_API_KEY;
+
 export default class Sonarr {
   private readonly connectionUrl: string;
 
@@ -38,7 +40,9 @@ export default class Sonarr {
     console.log('Getting episode');
     const episodesForShow = await this.getEpisodesForShow(matchingShow);
 
-    const matchingEpisode = episodesForShow.find(i => this.zeroPad(i.episodeNumber, 2) === episode && this.zeroPad(i.seasonNumber, 2) === season);
+    const matchingEpisode = episodesForShow.find(
+      i => this.zeroPad(i.episodeNumber, 2) === episode && this.zeroPad(i.seasonNumber, 2) === season,
+    );
 
     if (!matchingEpisode) {
       throw new SonarrError(`Could not find episode ${episodeNumber} inside ${showName}`);
@@ -49,7 +53,7 @@ export default class Sonarr {
       await this.deleteEpisode(matchingEpisode);
     }
 
-    let queue = await this.getActivityQueue();
+    const queue = await this.getActivityQueue();
     if (queue.find(i => i.episode.id === matchingEpisode.id)) {
       return RedownloadStatus.CURRENTLY_DOWNLOADING;
     }
@@ -67,7 +71,7 @@ export default class Sonarr {
     }
 
     const fuzzySet = FuzzySet(shows.map(i => i.title));
-    let closestMatches = fuzzySet.get(showName);
+    const closestMatches = fuzzySet.get(showName);
 
     if (closestMatches) {
       throw new SonarrError(`Couldn't find show with name ${showName}, did you mean ${closestMatches[0][1]}?`);
@@ -88,47 +92,23 @@ export default class Sonarr {
     return axiosResponse.data;
   }
 
-  private async deleteEpisode(episode: { episodeFileId: number }) {
-    let url = this.buildConnectionStringWithId('episodeFile', episode.episodeFileId);
+  private async deleteEpisode(episode: { episodeFileId: number }): Promise<void> {
+    const url = this.buildConnectionStringWithId('episodeFile', episode.episodeFileId);
     await axios.delete(url);
   }
 
-  private async searchForEpisode(episodeId: number) {
-    let url = this.buildConnectionString('command');
-
-    return await axios.post(url, { name: 'EpisodeSearch', episodeIds: [episodeId] });
+  private async searchForEpisode(episodeId: number): Promise<void> {
+    const url = this.buildConnectionString('command');
+    await axios.post(url, { name: 'EpisodeSearch', episodeIds: [episodeId] });
   }
 
-  private zeroPad(input: number, length: number) {
+  private zeroPad(input: number, length: number): string {
     return (Array(length + 1).join('0') + input).slice(-length);
   }
 
   private async getActivityQueue(): Promise<QueueItem[]> {
-    let url = this.buildConnectionString('queue');
-    let axiosResponse = await axios.get<QueueItem[]>(url);
+    const url = this.buildConnectionString('queue');
+    const axiosResponse = await axios.get<QueueItem[]>(url);
     return axiosResponse.data;
   }
-}
-
-interface Show {
-  id: number;
-  title: string;
-}
-
-interface Episode {
-  id: number
-  seriesId: number;
-  episodeFileId: number;
-  seasonNumber: number;
-  episodeNumber: number;
-}
-
-interface QueueItem {
-  series: Show;
-  episode: Episode;
-}
-
-export enum RedownloadStatus {
-  TRIGGERED_DOWNLOAD,
-  CURRENTLY_DOWNLOADING
 }
