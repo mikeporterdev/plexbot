@@ -11,7 +11,7 @@ client.on('ready', () => {
 });
 
 async function didNotUnderstandArgs(msg: Message): Promise<void> {
-  await msg.reply(`I don't understand your command, try plexbot redownload,show,<showName>,<episodeNumber>`);
+  await msg.reply(`I don't understand your command, try plexbot redownload show,<showName>,<episodeNumber>`);
   await msg.reply('The commas are important!');
 }
 
@@ -80,6 +80,6 @@ client.on('message', async (msg: Message) => {
   }
 
   if (content.startsWith('plexbot help')) {
-    await msg.reply('Try plexbot redownload,show,<showName>,<episodeNumber>');
+    await msg.reply('Try plexbot redownload show,<showName>,<episodeNumber>');
   }
 });
