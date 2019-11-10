@@ -1,0 +1,28 @@
+{
+  "name": "plex-utility-discord-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "compile": "tsc",
+    "compile:watch": "tsc-watch",
+    "start": "tsc-watch --onSuccess \"nodemon dist\"",
+    "lint": "eslint src --ext ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^12.12.7",
+    "axios": "^0.19.0",
+    "discord.js": "^11.5.1"
+  },
+  "devDependencies": {
+    "@types/axios": "^0.14.0",
+    "eslint": "^6.6.0",
+    "nodemon": "^1.19.4",
+    "prettier": "^1.19.1",
+    "tsc-watch": "^4.0.0",
+    "typescript": "^3.7.2"
+  }
+}
