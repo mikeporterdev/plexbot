@@ -38,12 +38,7 @@ client.on('message', async (msg: Message) => {
 
         try {
             if (mediaType == 'movie') {
-                if (args.length != 2) {
-                    await didNotUnderstandArgs(msg);
-                    return;
-                }
-
-                // await redownloadMedia((mediaType as MediaType), args[1]);
+                msg.reply('I can\'t handle movies yet!');
             }
 
             if (mediaType === 'show') {
@@ -52,6 +47,7 @@ client.on('message', async (msg: Message) => {
                     return;
                 }
 
+                console.log('triggering download');
                 let redownloadStatus = await redownloadTV(args[1], args[2]);
 
                 if (redownloadStatus === RedownloadStatus.TRIGGERED_DOWNLOAD) {
@@ -76,6 +72,5 @@ client.on('message', async (msg: Message) => {
 
 async function didNotUnderstandArgs(msg: Message) {
     await msg.reply(`I don't understand your command, try plexbot redownload,show,<showName>,<episodeNumber>`);
-    await msg.reply(`Or for movies try plexbot redownload,movie,<movieName>`);
     await msg.reply('The commas are important!');
 }

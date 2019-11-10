@@ -1,5 +1,6 @@
 import axios from 'axios'
 import SonarrError from "./exceptions/SonarrError";
+import FuzzySet = require("fuzzyset.js");
 
 const sonarrUrl = process.env.SONARR_URL;
 const sonarrApiKey = process.env.SONARR_API_KEY;
@@ -11,20 +12,15 @@ export default class Sonarr {
     }
 
     private buildConnectionString(command: string): string {
-        let url = `${this.connectionUrl}/${command}?apiKey=${sonarrApiKey}`;
-        console.log(url);
-        return url;
+        return `${this.connectionUrl}/${command}?apiKey=${sonarrApiKey}`;
     }
 
     private buildConnectionStringWithId(command: string, id: number): string {
-        let url = `${this.connectionUrl}/${command}/${id}/?apiKey=${sonarrApiKey}`;
-        console.log(url);
-        return url;
-
+        return `${this.connectionUrl}/${command}/${id}/?apiKey=${sonarrApiKey}`;
     }
 
     public async redownloadShow(showName: string, episodeNumber: string): Promise<RedownloadStatus> {
-        if (!episodeNumber.match(new RegExp('S\\d\\dE\\d\\d'))) {
+        if (!episodeNumber.toUpperCase().match(new RegExp('S\\d\\dE\\d\\d'))) {
             throw new SonarrError('Invalid episode number, should be format S01E01');
         }
 
@@ -70,24 +66,19 @@ export default class Sonarr {
             return exactMatch;
         }
 
-        // TODO: implement fuzzy match
+        const fuzzySet = FuzzySet(shows.map(i => i.title));
+        let closestMatches = fuzzySet.get(showName);
+
+        if (closestMatches) {
+            throw new SonarrError(`Couldn't find show with name ${showName}, did you mean ${closestMatches[0][1]}?`);
+        }
 
         return null;
-    }
-
-    private findMatchingEpisode(episodes: EpisodeFile[], episodeNumber: string): EpisodeFile | undefined {
-        return episodes.find(i => i.path.includes(episodeNumber));
     }
 
     private async getEpisodesForShow(show: Show): Promise<Episode[]> {
         const url = `${this.buildConnectionString('episode')}&seriesId=${show.id}`;
         const axiosResponse = await axios.get<Episode[]>(url);
-        return axiosResponse.data
-    }
-
-    private async getEpisodeFilesForShow(show: Show): Promise<EpisodeFile[]> {
-        const url = `${this.buildConnectionString('episodefile')}&seriesId=${show.id}`;
-        const axiosResponse = await axios.get<EpisodeFile[]>(url);
         return axiosResponse.data
     }
 
@@ -105,11 +96,7 @@ export default class Sonarr {
     private async searchForEpisode(episodeId: number) {
         let url = this.buildConnectionString('command');
 
-        let axiosResponse = await axios.post(url, {name: 'EpisodeSearch', episodeIds: [episodeId]});
-
-        console.log(axiosResponse.status);
-
-        return axiosResponse;
+        return await axios.post(url, {name: 'EpisodeSearch', episodeIds: [episodeId]});
     }
 
     private zeroPad(input: number, length: number) {
@@ -134,12 +121,6 @@ interface Episode {
     episodeFileId: number;
     seasonNumber: number;
     episodeNumber: number;
-}
-
-interface EpisodeFile {
-    id: number;
-    seriesId: number;
-    path: string;
 }
 
 interface QueueItem {
