@@ -11,11 +11,15 @@ export default class Sonarr {
     }
 
     private buildConnectionString(command: string): string {
-        return `${this.connectionUrl}/${command}?apiKey=${sonarrApiKey}`;
+        let url = `${this.connectionUrl}/${command}?apiKey=${sonarrApiKey}`;
+        console.log(url);
+        return url;
     }
 
     private buildConnectionStringWithId(command: string, id: number): string {
-        return `${this.connectionUrl}/${command}/${id}/?apiKey=${sonarrApiKey}`;
+        let url = `${this.connectionUrl}/${command}/${id}/?apiKey=${sonarrApiKey}`;
+        console.log(url);
+        return url;
 
     }
 
@@ -35,6 +39,7 @@ export default class Sonarr {
             throw new SonarrError(`Could not find show with name ${showName} ¯\\_(ツ)_/¯`)
         }
 
+        console.log('Getting episode');
         const episodesForShow = await this.getEpisodesForShow(matchingShow);
 
         const matchingEpisode = episodesForShow.find(i => this.zeroPad(i.episodeNumber, 2) === episode && this.zeroPad(i.seasonNumber, 2) === season);
@@ -44,6 +49,7 @@ export default class Sonarr {
         }
 
         if (matchingEpisode.episodeFileId !== 0) {
+            console.log('Found file for episode, deleting');
             await this.deleteEpisode(matchingEpisode);
         }
 
@@ -52,6 +58,7 @@ export default class Sonarr {
             return RedownloadStatus.CURRENTLY_DOWNLOADING;
         }
 
+        console.log('Triggering download for episode');
         await this.searchForEpisode(matchingEpisode.id);
 
         return RedownloadStatus.TRIGGERED_DOWNLOAD;
@@ -98,7 +105,11 @@ export default class Sonarr {
     private async searchForEpisode(episodeId: number) {
         let url = this.buildConnectionString('command');
 
-        await axios.post(url, {name: 'EpisodeSearch', episodeIds: [episodeId]});
+        let axiosResponse = await axios.post(url, {name: 'EpisodeSearch', episodeIds: [episodeId]});
+
+        console.log(axiosResponse.status);
+
+        return axiosResponse;
     }
 
     private zeroPad(input: number, length: number) {
