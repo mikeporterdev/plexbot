@@ -3,11 +3,12 @@ WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-RUN npm install
+RUN npm install --only-production\
+    && npm install typescript -g
 
 COPY . .
 
-RUN npm run compile
+RUN tsc
 
 CMD ["node", "dist/index.js"]
 
