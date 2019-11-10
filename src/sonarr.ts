@@ -27,7 +27,7 @@ export default class Sonarr {
     const season = episodeNumber.substring(1, 3);
     const episode = episodeNumber.substring(4, 6);
 
-    const shows = await this.getShows(showName);
+    const shows = await this.getShows();
 
     const matchingShow = await this.findMatchingShow(shows, showName);
 
