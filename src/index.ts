@@ -45,12 +45,14 @@ async function redownload(msg: Message, content: string): Promise<void> {
       }
 
       console.log('triggering download');
-      const redownloadStatus = await redownloadTV(args[1], args[2]);
+      const redownloadResponse = await redownloadTV(args[1], args[2]);
 
-      if (redownloadStatus === RedownloadStatus.TRIGGERED_DOWNLOAD) {
-        msg.reply(`I triggered a download for ${args[1]} - ${args[2]}`);
-      } else if (redownloadStatus === RedownloadStatus.CURRENTLY_DOWNLOADING) {
-        msg.reply(`I'm in the middle of downloading ${args[1]} - ${args[2]}`);
+      const formattedShow = `${redownloadResponse.show.title} - ${args[2]}`;
+
+      if (redownloadResponse.status === RedownloadStatus.TRIGGERED_DOWNLOAD) {
+        msg.reply(`I triggered a download for ${formattedShow}`);
+      } else if (redownloadResponse.status === RedownloadStatus.CURRENTLY_DOWNLOADING) {
+        msg.reply(`I'm in the middle of downloading ${formattedShow}`);
       }
     }
   } catch (e) {

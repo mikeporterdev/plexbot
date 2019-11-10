@@ -20,3 +20,8 @@ export enum RedownloadStatus {
   TRIGGERED_DOWNLOAD,
   CURRENTLY_DOWNLOADING,
 }
+
+export interface RedownloadResponse {
+  status: RedownloadStatus;
+  show: Show;
+}

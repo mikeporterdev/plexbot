@@ -1,6 +1,6 @@
 import axios from 'axios';
 import PlexbotError from './exceptions/PlexbotError';
-import { Episode, QueueItem, RedownloadStatus, Show } from './types/types';
+import { Episode, QueueItem, RedownloadResponse, RedownloadStatus, Show } from './types/types';
 import { findMatching } from './get-fuzzy';
 
 const sonarrUrl = process.env.SONARR_URL;
@@ -16,7 +16,7 @@ function buildConnectionStringWithId(command: string, id: number): string {
   return `${connectionUrl}/${command}/${id}/?apiKey=${sonarrApiKey}`;
 }
 
-export async function redownloadShow(showName: string, episodeNumber: string): Promise<RedownloadStatus> {
+export async function redownloadShow(showName: string, episodeNumber: string): Promise<RedownloadResponse> {
   if (!episodeNumber.toUpperCase().match(new RegExp('S\\d\\dE\\d\\d'))) {
     throw new PlexbotError('Invalid episode number, should be format S01E01');
   }
@@ -50,13 +50,13 @@ export async function redownloadShow(showName: string, episodeNumber: string): P
 
   const queue = await getActivityQueue();
   if (queue.find(i => i.episode.id === matchingEpisode.id)) {
-    return RedownloadStatus.CURRENTLY_DOWNLOADING;
+    return { status: RedownloadStatus.CURRENTLY_DOWNLOADING, show: matchingShow };
   }
 
   console.log('Triggering download for episode');
   await searchForEpisode(matchingEpisode.id);
 
-  return RedownloadStatus.TRIGGERED_DOWNLOAD;
+  return { status: RedownloadStatus.TRIGGERED_DOWNLOAD, show: matchingShow };
 }
 
 async function getEpisodesForShow(show: Show): Promise<Episode[]> {
