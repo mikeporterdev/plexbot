@@ -7,7 +7,7 @@ import { RedownloadStatus } from './types/types';
 const redownloadCommand = 'plexbot redownload';
 
 client.on('ready', () => {
-  console.log(`logged in as ${client.user.tag}`);
+  console.log(`logged in as ${client.user?.tag}`);
 });
 
 async function didNotUnderstandArgs(msg: Message): Promise<void> {
