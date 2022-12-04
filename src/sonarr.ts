@@ -6,7 +6,7 @@ import { findMatching } from './get-fuzzy';
 const sonarrUrl = process.env.SONARR_URL;
 const sonarrApiKey = process.env.SONARR_API_KEY;
 
-const connectionUrl = `${sonarrUrl}/api`;
+const connectionUrl = `${sonarrUrl}/api/v3`;
 
 function buildConnectionString(command: string): string {
   return `${connectionUrl}/${command}?apiKey=${sonarrApiKey}`;
