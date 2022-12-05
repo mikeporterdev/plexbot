@@ -11,9 +11,12 @@ export interface Episode {
   episodeNumber: number;
 }
 
+export interface GetActivityQueueResponse {
+  records: QueueItem[];
+}
+
 export interface QueueItem {
-  series: Show;
-  episode: Episode;
+  episodeId: number
 }
 
 export enum RedownloadStatus {

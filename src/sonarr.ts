@@ -1,6 +1,13 @@
 import axios from 'axios';
 import PlexbotError from './exceptions/PlexbotError';
-import { Episode, QueueItem, RedownloadResponse, RedownloadStatus, Show } from './types/types';
+import {
+  Episode,
+  GetActivityQueueResponse,
+  QueueItem,
+  RedownloadResponse,
+  RedownloadStatus,
+  Show
+} from './types/types';
 import { findMatching } from './get-fuzzy';
 
 const sonarrUrl = process.env.SONARR_URL;
@@ -32,7 +39,6 @@ export async function redownloadShow(showName: string, episodeNumber: string): P
     throw new PlexbotError(`Could not find show with name ${showName} ¯\\_(ツ)_/¯`);
   }
 
-  console.log('Getting episode');
   const episodesForShow = await getEpisodesForShow(matchingShow);
 
   const matchingEpisode = episodesForShow.find(
@@ -49,7 +55,7 @@ export async function redownloadShow(showName: string, episodeNumber: string): P
   }
 
   const queue = await getActivityQueue();
-  if (queue.find(i => i.episode.id === matchingEpisode.id)) {
+  if (queue.find(i => i.episodeId === matchingEpisode.id)) {
     return { status: RedownloadStatus.CURRENTLY_DOWNLOADING, show: matchingShow };
   }
 
@@ -87,6 +93,6 @@ function zeroPad(input: number, length: number): string {
 
 async function getActivityQueue(): Promise<QueueItem[]> {
   const url = buildConnectionString('queue');
-  const axiosResponse = await axios.get<QueueItem[]>(url);
-  return axiosResponse.data;
+  const axiosResponse = await axios.get<GetActivityQueueResponse>(url);
+  return axiosResponse.data.records;
 }
