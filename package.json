@@ -15,7 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/node": "^12.12.7",
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "discord.js": "^12.5.2",
     "fuzzyset.js": "1.0.6"
   },
