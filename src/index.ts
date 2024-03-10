@@ -59,8 +59,8 @@ async function redownload(msg: Message, content: string): Promise<void> {
     if (e instanceof PlexbotError) {
       await msg.reply(e.message);
     } else {
-      await msg.reply('Something went wrong :(');
       console.error(e);
+      await msg.reply('Something went wrong :(');
     }
   }
 }
